@@ -31,20 +31,116 @@ Copyright:
     statement from all source files in the program, then also delete it here.
 */
 
-AutoBotPlugin = Ext.extend(Deluge.Plugin, {
-	constructor: function(config) {
-		config = Ext.apply({
-			name: "AutoBot"
-		}, config);
-		AutoBotPlugin.superclass.constructor.call(this, config);
-	},
+Ext.namespace('Deluge.plugins.autobot.ui');
+Ext.namespace('Deluge.plugins.autobot.util');
 
-	onDisable: function() {
+Deluge.plugins.autobot.PLUGIN_NAME = 'AutoBot';
+Deluge.plugins.autobot.MODULE_NAME = 'AutoBot';
+Deluge.plugins.autobot.DISPLAY_NAME = _('AutoBot');
 
-	},
+Deluge.plugins.autobot.ui.PreferencePage = Ext.extend(Ext.Panel, {
 
-	onEnable: function() {
+    title: Deluge.plugins.autobot.DISPLAY_NAME = _('AutoBot'),
 
-	}
+    layout: {
+        type: 'vbox',
+        align: 'stretch'
+    },
+
+    initComponent: function() {
+        Deluge.plugins.autobot.ui.PreferencePage.superclass.initComponent.call(
+            this
+        );
+
+        // Server address/port
+        this.serverInfo = this.add({
+            xtype: 'container',
+            layout: 'hbox',
+            items: [{
+                xtype: 'label',
+                text: _('Server')
+            },{
+                xtype: 'textfield',
+                allowBlank: false,
+                blankText: 'A valid DNS or IP address is needed'
+            },{
+                xtype: 'label',
+                text: _('Port')
+            },{
+                xtype: 'spinnerfield',
+                name: 'serverPort',
+                fieldLabel: _('Port Number'),
+                value: 6997,
+                minValue: 0,
+                maxValue: 65535,
+                allowDecimals: false
+            }],
+        });
+
+        this.botChannel = this.add({
+            xtype: 'container',
+            layout: 'hbox',
+            items: [{
+                xtype: 'label',
+                text: _('Channel')
+            },{
+                xtype: 'textfield',
+                allowBlank: false,
+                blankText: 'A valid IRC channel is needed'
+            }]
+        });
+
+        this.botName = this.add({
+            xtype: 'container',
+            layout: 'hbox',
+            items: [{
+                xtype: 'label',
+                text: _('Name')
+            },{
+                xtype: 'textfield',
+                allowBlank: false,
+                blankText: 'A valid IRC handle/nickname is needed'
+            }]
+        });
+
+        this.searchRegex = this.add({
+            xtype: 'container',
+            layout: 'hbox',
+            items: [{
+                xtype: 'label',
+                text: _('Regex')
+            },{
+                xtype: 'textfield',
+                allowBlank: true
+            }]
+        });
+
+    }
+
 });
-new AutoBotPlugin();
+
+Deluge.plugins.autobot.Plugin = Ext.extend(Deluge.Plugin, {
+
+    name: Deluge.plugins.autobot.PLUGIN_NAME,
+
+    onEnable: function() {
+        this.prefsPage = new Deluge.plugins.autobot.ui.PreferencePage();
+        deluge.preferences.addPage(this.prefsPage);
+
+        console.log("%s enabled!", Deluge.plugins.autobot.PLUGIN_NAME);
+    },
+
+    onDisable: function() {
+        deluge.preferences.selectPage(_('Plugins'));
+        deluge.preferences.removePage(this.prefsPage);
+        this.prefsPage.destroy();
+
+        console.log("%s disabled!", Deluge.plugins.autobot.PLUGIN_NAME);
+    }
+
+});
+
+Deluge.registerPlugin(
+    Deluge.plugins.autobot.PLUGIN_NAME,
+    Deluge.plugins.autobot.Plugin
+);

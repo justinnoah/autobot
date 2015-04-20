@@ -53,23 +53,10 @@ class GtkUI(GtkPluginBase):
 
         component.get("Preferences").add_page("AutoBot", self.glade.get_widget("prefs_box"))
         component.get("PluginManager").register_hook("on_apply_prefs", self.on_apply_prefs)
-        component.get("PluginManager").register_hook("on_show_prefs", self.on_show_prefs)
 
     def disable(self):
         component.get("Preferences").remove_page("AutoBot")
         component.get("PluginManager").deregister_hook("on_apply_prefs", self.on_apply_prefs)
-        component.get("PluginManager").deregister_hook("on_show_prefs", self.on_show_prefs)
 
     def on_apply_prefs(self):
         log.debug("applying prefs for AutoBot")
-        config = {
-            "test":self.glade.get_widget("txt_test").get_text()
-        }
-        client.autobot.set_config(config)
-
-    def on_show_prefs(self):
-        client.autobot.get_config().addCallback(self.cb_get_config)
-
-    def cb_get_config(self, config):
-        "callback for on show_prefs"
-        self.glade.get_widget("txt_test").set_text(config["test"])
